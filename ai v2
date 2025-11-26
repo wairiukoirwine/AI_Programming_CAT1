@@ -1,0 +1,154 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyMVnM71YxgPb71dLwRU77FY",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/wairiukoirwine/AI_Programming_CAT1/blob/main/ai%20v2\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import time\n",
+        "import json\n",
+        "from difflib import get_close_matches\n",
+        "\n",
+        "def bot_says(text):\n",
+        "    \"\"\"Simulate typing effect for chatbot output.\"\"\"\n",
+        "    for char in text:\n",
+        "        print(char, end='', flush=True)\n",
+        "        time.sleep(0.02)\n",
+        "    print()\n",
+        "\n",
+        "print(\"\\nCourssistant Bot (type 'bye' to exit)\\n\")\n",
+        "\n",
+        "# Load memory (if exists)\n",
+        "try:\n",
+        "    with open(\"course_bot_memory.json\", \"r\") as file:\n",
+        "        memory = json.load(file)\n",
+        "        memory_questions = memory[\"questions\"]\n",
+        "        memory_responses = memory[\"responses\"]\n",
+        "except:\n",
+        "    memory_questions = []\n",
+        "    memory_responses = []\n",
+        "\n",
+        "def get_best_match(user_input):\n",
+        "    \"\"\"Find closest matching question from memory.\"\"\"\n",
+        "    match = get_close_matches(user_input, memory_questions, n=1, cutoff=0.6)\n",
+        "    return match[0] if match else None\n",
+        "\n",
+        "# --- MAIN CHAT LOOP ---\n",
+        "while True:\n",
+        "    user_input = input(\"You: \").lower().strip()\n",
+        "\n",
+        "    if user_input == \"bye\":\n",
+        "        bot_says(\"Saving memory...\")\n",
+        "        with open(\"course_bot_memory.json\", \"w\") as file:\n",
+        "            json.dump({\"questions\": memory_questions,\n",
+        "                       \"responses\": memory_responses}, file)\n",
+        "        bot_says(\"Goodbye!\")\n",
+        "        break\n",
+        "\n",
+        "    # Auto-correct / best guess\n",
+        "    if user_input not in memory_questions:\n",
+        "        guess = get_best_match(user_input)\n",
+        "        if guess:\n",
+        "            bot_says(f\"Did you mean: '{guess}'? (y/n)\")\n",
+        "            confirm = input(\"You: \").lower()\n",
+        "            if confirm == \"y\":\n",
+        "                user_input = guess\n",
+        "\n",
+        "    # Respond from memory\n",
+        "    if user_input in memory_questions:\n",
+        "        reply = memory_responses[memory_questions.index(user_input)]\n",
+        "        bot_says(reply)\n",
+        "        continue\n",
+        "\n",
+        "    # Predefined intents (AI/COURSE FAQs)\n",
+        "    if any(word in user_input for word in [\"hello\", \"hi\", \"hey\"]):\n",
+        "        bot_says(\"Hello! How can I assist you with your AI course today?\")\n",
+        "\n",
+        "    elif \"what is ai\" in user_input or \"define ai\" in user_input:\n",
+        "        bot_says(\"Artificial Intelligence (AI) is the simulation of human intelligence in machines that can learn, reason, and make decisions.\")\n",
+        "\n",
+        "    elif \"applications of ai\" in user_input or \"use of ai\" in user_input:\n",
+        "        bot_says(\"AI is used in many fields — from healthcare and finance to transportation, education, and robotics.\")\n",
+        "\n",
+        "    elif \"who teaches\" in user_input or \"lecturer\" in user_input:\n",
+        "        bot_says(\"The AI course is taught by qualified lecturers who specialize in machine learning, data science, and programming.\")\n",
+        "\n",
+        "    elif \"topics\" in user_input or \"syllabus\" in user_input:\n",
+        "        bot_says(\"The AI course covers Machine Learning, Neural Networks, Natural Language Processing, and Robotics fundamentals.\")\n",
+        "\n",
+        "    elif \"contact\" in user_input or \"support\" in user_input:\n",
+        "        bot_says(\"You can reach the department office via email or visit the academic office during working hours.\")\n",
+        "\n",
+        "    elif \"exam\" in user_input or \"assessment\" in user_input:\n",
+        "        bot_says(\"The course assessment includes assignments, CATs, and a final exam. Continuous assessment is key to success!\")\n",
+        "\n",
+        "    else:\n",
+        "        # Learn new response\n",
+        "        bot_says(\"I don't have an answer for that yet. Can you teach me how to respond?\")\n",
+        "        new_reply = input(\"Reply: \")\n",
+        "        memory_questions.append(user_input)\n",
+        "        memory_responses.append(new_reply)\n",
+        "        bot_says(\"Got it! I’ve learned something new.\")\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "WfMQeIIoYDM8",
+        "outputId": "602f4d91-0895-4255-ca17-4a17be55bcba"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "Courssistant Bot (type 'bye' to exit)\n",
+            "\n",
+            "You: hey\n",
+            "Hello! How can I assist you with your AI course today?\n",
+            "You: are you french?\n",
+            "I don't have an answer for that yet. Can you teach me how to respond?\n",
+            "Reply: yes i am french\n",
+            "Got it! I’ve learned something new.\n",
+            "You: are you french\n",
+            "Did you mean: 'are you french?'? (y/n)\n",
+            "You: y\n",
+            "yes i am french\n",
+            "You: what are you\n",
+            "I don't have an answer for that yet. Can you teach me how to respond?\n",
+            "Reply: i am a chat bot designed to answer known questions and learn answers i dont hav\n",
+            "Got it! I’ve learned something new.\n",
+            "You: what are you\n",
+            "i am a chat bot designed to answer known questions and learn answers i dont hav\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
